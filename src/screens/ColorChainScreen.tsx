@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { PrimaryButton, ColorBlock, RGBSliders, PrecisionBar } from '@/components';
 import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 import { 
   RGB, 
   precisionPercent, 
@@ -29,6 +30,7 @@ export const ColorChainScreen: React.FC = () => {
   const route = useRoute<ColorChainScreenRouteProp>();
   const navigation = useNavigation();
   const { 
+    isDarkMode,
     showPrecisionBar, 
     showHexValue, 
     showRGBLabels, 
@@ -38,6 +40,8 @@ export const ColorChainScreen: React.FC = () => {
     setDailyChallengeScore,
     setDailyChallengeDate
   } = useGameStore();
+  
+  const theme = getTheme(isDarkMode);
   
   const isDaily = route.params?.isDaily || false;
   
@@ -192,7 +196,7 @@ export const ColorChainScreen: React.FC = () => {
             />
             <PrimaryButton
               title="Volver al menú"
-              onPress={() => navigation.navigate('Home' as never)}
+              onPress={() => navigation.navigate('MainTabs' as never)}
               style={styles.menuButton}
             />
           </View>
@@ -203,28 +207,28 @@ export const ColorChainScreen: React.FC = () => {
 
   if (gameFinished) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.finalStatsContainer}>
-          <Text style={styles.finalStatsTitle}>¡Partida Finalizada!</Text>
+          <Text style={[styles.finalStatsTitle, { color: theme.text }]}>¡Partida Finalizada!</Text>
           
           <View style={styles.finalStatsSection}>
-            <Text style={styles.finalStatsSubtitle}>Estadísticas Finales</Text>
+            <Text style={[styles.finalStatsSubtitle, { color: theme.textSecondary }]}>Estadísticas Finales</Text>
             
             <View style={styles.finalStatsGrid}>
-              <View style={styles.finalStatCard}>
-                <Text style={styles.finalStatValue}>{finalStats.finalAverage}%</Text>
-                <Text style={styles.finalStatLabel}>Media Final</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
+                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.finalAverage}%</Text>
+                <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Media Final</Text>
               </View>
               
-              <View style={styles.finalStatCard}>
-                <Text style={styles.finalStatValue}>{finalStats.totalSteps}</Text>
-                <Text style={styles.finalStatLabel}>Pasos Totales</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
+                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.totalSteps}</Text>
+                <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Pasos Totales</Text>
               </View>
             </View>
             
-            <View style={styles.finalStatCardFull}>
-              <Text style={styles.finalStatValue}>{finalStats.levelReached}</Text>
-              <Text style={styles.finalStatLabel}>Nivel Alcanzado</Text>
+            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.levelReached}</Text>
+              <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Nivel Alcanzado</Text>
             </View>
           </View>
           
@@ -236,7 +240,7 @@ export const ColorChainScreen: React.FC = () => {
             />
             <PrimaryButton
               title="Volver al menú"
-              onPress={() => navigation.navigate('Home' as never)}
+              onPress={() => navigation.navigate('MainTabs' as never)}
               style={styles.menuButton}
             />
           </View>
@@ -247,26 +251,26 @@ export const ColorChainScreen: React.FC = () => {
 
   if (showLevelResults) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>¡Nivel {currentStep} Completado!</Text>
+          <Text style={[styles.resultsTitle, { color: theme.text }]}>¡Nivel {currentStep} Completado!</Text>
           
-          <View style={styles.targetColorSection}>
-            <Text style={styles.targetColorLabel}>Color objetivo</Text>
+          <View style={[styles.targetColorSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Text style={[styles.targetColorLabel, { color: theme.text }]}>Color objetivo</Text>
             <View style={styles.targetColorWrapper}>
               <ColorBlock rgb={targetColor} size="large" />
             </View>
-            <Text style={styles.hexCode}>{rgbToHex(targetColor).toUpperCase()}</Text>
+            <Text style={[styles.hexCode, { color: theme.text }]}>{rgbToHex(targetColor).toUpperCase()}</Text>
           </View>
           
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{levelResult}%</Text>
-              <Text style={styles.statLabel}>Precisión</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{levelResult}%</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Precisión</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stepCount}</Text>
-              <Text style={styles.statLabel}>Pasos</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{stepCount}</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Pasos</Text>
             </View>
           </View>
 
@@ -274,7 +278,7 @@ export const ColorChainScreen: React.FC = () => {
             {isDaily ? (
               <PrimaryButton
                 title="Volver al menú"
-                onPress={() => navigation.navigate('Home' as never)}
+                onPress={() => navigation.navigate('MainTabs' as never)}
                 style={styles.menuButton}
               />
             ) : (
@@ -298,10 +302,10 @@ export const ColorChainScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Color Chain</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Color Chain</Text>
           {isDaily && (
             <View style={styles.dailyBadge}>
               <Text style={styles.dailyBadgeText}>🎯 RETO DIARIO</Text>
@@ -310,11 +314,11 @@ export const ColorChainScreen: React.FC = () => {
         </View>
       {!isDaily && (
         <View style={styles.statsContainer}>
-          <Text style={styles.statText}>Pasos: {stepCount}</Text>
-          <Text style={styles.statText}>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>Pasos: {stepCount}</Text>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>
             Media: {averageLevel > 0 ? `${averageLevel}%` : 'Desconocido'}
           </Text>
-          <Text style={styles.statText}>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>
             Mejor: {bestColorChain > 0 ? `${bestColorChain}%` : 'N/A'}
           </Text>
         </View>
@@ -323,7 +327,7 @@ export const ColorChainScreen: React.FC = () => {
 
       {!isDaily && (
         <View style={styles.levelContainer}>
-          <Text style={styles.levelText}>Nivel {currentStep}</Text>
+          <Text style={[styles.levelText, { color: theme.text }]}>Nivel {currentStep}</Text>
         </View>
       )}
 
@@ -337,7 +341,7 @@ export const ColorChainScreen: React.FC = () => {
       </View>
 
       <View style={styles.currentColorContainer}>
-        <Text style={styles.currentLabel}>Tu color</Text>
+        <Text style={[styles.currentLabel, { color: theme.text }]}>Tu color</Text>
         <ColorBlock
           rgb={currentColor}
           size="large"
@@ -373,7 +377,6 @@ export const ColorChainScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0b0b',
     padding: 20,
   },
   header: {
@@ -390,7 +393,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   dailyBadge: {
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
@@ -416,7 +418,6 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '600',
   },
   levelContainer: {
@@ -425,7 +426,6 @@ const styles = StyleSheet.create({
   },
   levelText: {
     fontSize: 18,
-    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   colorsContainer: {
@@ -440,7 +440,6 @@ const styles = StyleSheet.create({
   currentLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 12,
   },
   precisionContainer: {
@@ -666,15 +665,12 @@ const styles = StyleSheet.create({
   targetColorSection: {
     alignItems: 'center',
     marginBottom: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 25,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   targetColorLabel: {
     fontSize: 20,
-    color: '#FFFFFF',
     fontWeight: '700',
     marginBottom: 15,
     textTransform: 'uppercase',
@@ -689,7 +685,6 @@ const styles = StyleSheet.create({
   },
   hexCode: {
     fontSize: 18,
-    color: '#FFFFFF',
     fontWeight: '600',
     marginTop: 15,
     fontFamily: 'monospace',

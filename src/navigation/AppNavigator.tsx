@@ -11,6 +11,8 @@ import {
   SettingsScreen
 } from '@/screens';
 import { BottomTabBar } from '@/components';
+import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -33,6 +35,7 @@ const MainTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       tabBar={(props) => <BottomTabBar {...props} />}
+      initialRouteName="Games"
       screenOptions={{
         headerShown: false,
         tabBarStyle: { display: 'none' }, // Ocultamos la barra nativa
@@ -46,6 +49,9 @@ const MainTabNavigator: React.FC = () => {
 };
 
 export const AppNavigator: React.FC = () => {
+  const { isDarkMode } = useGameStore();
+  const theme = getTheme(isDarkMode);
+  
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -55,7 +61,7 @@ export const AppNavigator: React.FC = () => {
           gestureEnabled: true,
           gestureDirection: 'horizontal',
           cardStyle: {
-            backgroundColor: '#0b0b0b',
+            backgroundColor: theme.background,
           },
           cardStyleInterpolator: ({ current, layouts }) => {
             return {

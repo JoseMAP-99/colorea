@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { PrimaryButton, ColorBlock, RGBSliders, PrecisionBar } from '@/components';
 import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 import { 
   RGB, 
   precisionPercent, 
@@ -34,6 +35,7 @@ export const GradientGapScreen: React.FC = () => {
   const route = useRoute<GradientGapScreenRouteProp>();
   const navigation = useNavigation();
   const { 
+    isDarkMode,
     showPrecisionBar, 
     showHexValue, 
     showRGBLabels, 
@@ -43,6 +45,8 @@ export const GradientGapScreen: React.FC = () => {
     setDailyChallengeScore,
     setDailyChallengeDate
   } = useGameStore();
+  
+  const theme = getTheme(isDarkMode);
   
   const isDaily = route.params?.isDaily || false;
   
@@ -259,28 +263,28 @@ export const GradientGapScreen: React.FC = () => {
 
   if (gameFinished) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.finalStatsContainer}>
-          <Text style={styles.finalStatsTitle}>¡Partida Finalizada!</Text>
+          <Text style={[styles.finalStatsTitle, { color: theme.text }]}>¡Partida Finalizada!</Text>
           
           <View style={styles.finalStatsSection}>
-            <Text style={styles.finalStatsSubtitle}>Estadísticas Finales</Text>
+            <Text style={[styles.finalStatsSubtitle, { color: theme.textSecondary }]}>Estadísticas Finales</Text>
             
             <View style={styles.finalStatsGrid}>
-              <View style={styles.finalStatCard}>
-                <Text style={styles.finalStatValue}>{finalStats.finalAverage}%</Text>
-                <Text style={styles.finalStatLabel}>Media Final</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
+                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.finalAverage}%</Text>
+                <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Media Final</Text>
               </View>
               
-              <View style={styles.finalStatCard}>
-                <Text style={styles.finalStatValue}>{finalStats.totalSteps}</Text>
-                <Text style={styles.finalStatLabel}>Pasos Totales</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
+                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.totalSteps}</Text>
+                <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Pasos Totales</Text>
               </View>
             </View>
             
-            <View style={styles.finalStatCardFull}>
-              <Text style={styles.finalStatValue}>{finalStats.levelReached}</Text>
-              <Text style={styles.finalStatLabel}>Nivel Alcanzado</Text>
+            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.levelReached}</Text>
+              <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Nivel Alcanzado</Text>
             </View>
           </View>
           
@@ -292,7 +296,7 @@ export const GradientGapScreen: React.FC = () => {
             />
             <PrimaryButton
               title="Volver al menú"
-              onPress={() => navigation.navigate('Home' as never)}
+              onPress={() => navigation.navigate('MainTabs' as never)}
               style={styles.menuButton}
             />
           </View>
@@ -303,26 +307,26 @@ export const GradientGapScreen: React.FC = () => {
 
   if (showLevelResults) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>¡Nivel {currentLevel} Completado!</Text>
+          <Text style={[styles.resultsTitle, { color: theme.text }]}>¡Nivel {currentLevel} Completado!</Text>
           
-          <View style={styles.targetColorSection}>
-            <Text style={styles.targetColorLabel}>Color objetivo</Text>
+          <View style={[styles.targetColorSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Text style={[styles.targetColorLabel, { color: theme.text }]}>Color objetivo</Text>
             <View style={styles.targetColorWrapper}>
               <ColorBlock rgb={hexToRgb(targetHex)} size="large" />
             </View>
-            <Text style={styles.hexCode}>{targetHex.toUpperCase()}</Text>
+            <Text style={[styles.hexCode, { color: theme.text }]}>{targetHex.toUpperCase()}</Text>
           </View>
           
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{levelResult}%</Text>
-              <Text style={styles.statLabel}>Precisión</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{levelResult}%</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Precisión</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stepCount}</Text>
-              <Text style={styles.statLabel}>Pasos</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{stepCount}</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Pasos</Text>
             </View>
           </View>
 
@@ -330,7 +334,7 @@ export const GradientGapScreen: React.FC = () => {
             {isDaily ? (
               <PrimaryButton
                 title="Volver al menú"
-                onPress={() => navigation.navigate('Home' as never)}
+                onPress={() => navigation.navigate('MainTabs' as never)}
                 style={styles.menuButton}
               />
             ) : (
@@ -354,26 +358,26 @@ export const GradientGapScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Gradient Gap</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Gradient Gap</Text>
           {isDaily && (
             <View style={styles.dailyBadge}>
               <Text style={styles.dailyBadgeText}>🎯 RETO DIARIO</Text>
             </View>
           )}
         </View>
-        <Text style={styles.instruction}>
+        <Text style={[styles.instruction, { color: theme.textSecondary }]}>
           Completa el degradado recreando el color faltante
         </Text>
       </View>
 
       {!isDaily && (
         <View style={styles.statsContainer}>
-          <Text style={styles.statsText}>Nivel: {currentLevel}</Text>
-          <Text style={styles.statsText}>Media: {averageLevel === 0 ? 'Desconocido' : `${averageLevel}%`}</Text>
-          <Text style={styles.statsText}>Mejor: {bestGradientGap > 0 ? `${bestGradientGap}%` : 'N/A'}</Text>
+          <Text style={[styles.statsText, { color: theme.text }]}>Nivel: {currentLevel}</Text>
+          <Text style={[styles.statsText, { color: theme.text }]}>Media: {averageLevel === 0 ? 'Desconocido' : `${averageLevel}%`}</Text>
+          <Text style={[styles.statsText, { color: theme.text }]}>Mejor: {bestGradientGap > 0 ? `${bestGradientGap}%` : 'N/A'}</Text>
         </View>
       )}
 
@@ -384,7 +388,7 @@ export const GradientGapScreen: React.FC = () => {
       </View>
 
       <View style={styles.currentColorContainer}>
-        <Text style={styles.currentLabel}>Tu color</Text>
+        <Text style={[styles.currentLabel, { color: theme.text }]}>Tu color</Text>
         <ColorBlock
           rgb={currentColor}
           size="medium"

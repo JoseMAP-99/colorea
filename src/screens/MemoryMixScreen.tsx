@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { PrimaryButton, ColorBlock, RGBSliders, PrecisionBar } from '@/components';
 import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 import { 
   RGB, 
   precisionPercent, 
@@ -32,6 +33,7 @@ export const MemoryMixScreen: React.FC = () => {
   const route = useRoute<MemoryMixScreenRouteProp>();
   const navigation = useNavigation();
   const { 
+    isDarkMode,
     showPrecisionBar, 
     showHexValue, 
     showRGBLabels, 
@@ -41,6 +43,8 @@ export const MemoryMixScreen: React.FC = () => {
     setDailyChallengeScore,
     setDailyChallengeDate
   } = useGameStore();
+  
+  const theme = getTheme(isDarkMode);
   
   const isDaily = route.params?.isDaily || false;
   
@@ -226,10 +230,10 @@ export const MemoryMixScreen: React.FC = () => {
 
   if (gameCompleted) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.completedContainer}>
           <Text style={styles.completedTitle}>¡Completado!</Text>
-          <Text style={styles.completedText}>
+          <Text style={[styles.completedText, { color: theme.text }]}>
             Precisión final: {Math.round(currentPrecision)}%
           </Text>
           <View style={styles.completedButtonsContainer}>
@@ -240,7 +244,7 @@ export const MemoryMixScreen: React.FC = () => {
             />
             <PrimaryButton
               title="Volver al menú"
-              onPress={() => navigation.navigate('Home' as never)}
+              onPress={() => navigation.navigate('MainTabs' as never)}
               style={styles.menuButton}
             />
           </View>
@@ -251,28 +255,28 @@ export const MemoryMixScreen: React.FC = () => {
 
   if (gameFinished) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.finalStatsContainer}>
-          <Text style={styles.finalStatsTitle}>¡Partida Finalizada!</Text>
+          <Text style={[styles.finalStatsTitle, { color: theme.text }]}>¡Partida Finalizada!</Text>
           
           <View style={styles.finalStatsSection}>
-            <Text style={styles.finalStatsSubtitle}>Estadísticas Finales</Text>
+            <Text style={[styles.finalStatsSubtitle, { color: theme.textSecondary }]}>Estadísticas Finales</Text>
             
             <View style={styles.finalStatsGrid}>
-              <View style={styles.finalStatCard}>
-                <Text style={styles.finalStatValue}>{finalStats.finalAverage}%</Text>
-                <Text style={styles.finalStatLabel}>Media Final</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
+                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.finalAverage}%</Text>
+                <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Media Final</Text>
               </View>
               
-              <View style={styles.finalStatCard}>
-                <Text style={styles.finalStatValue}>{finalStats.totalSteps}</Text>
-                <Text style={styles.finalStatLabel}>Pasos Totales</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
+                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.totalSteps}</Text>
+                <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Pasos Totales</Text>
               </View>
             </View>
             
-            <View style={styles.finalStatCardFull}>
-              <Text style={styles.finalStatValue}>{finalStats.levelReached}</Text>
-              <Text style={styles.finalStatLabel}>Nivel Alcanzado</Text>
+            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.levelReached}</Text>
+              <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Nivel Alcanzado</Text>
             </View>
           </View>
           
@@ -284,7 +288,7 @@ export const MemoryMixScreen: React.FC = () => {
             />
             <PrimaryButton
               title="Volver al menú"
-              onPress={() => navigation.navigate('Home' as never)}
+              onPress={() => navigation.navigate('MainTabs' as never)}
               style={styles.menuButton}
             />
           </View>
@@ -295,26 +299,26 @@ export const MemoryMixScreen: React.FC = () => {
 
   if (showLevelResults) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>¡Nivel {currentLevel} Completado!</Text>
+          <Text style={[styles.resultsTitle, { color: theme.text }]}>¡Nivel {currentLevel} Completado!</Text>
           
-          <View style={styles.targetColorSection}>
-            <Text style={styles.targetColorLabel}>Color objetivo</Text>
+          <View style={[styles.targetColorSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Text style={[styles.targetColorLabel, { color: theme.text }]}>Color objetivo</Text>
             <View style={styles.targetColorWrapper}>
               <ColorBlock rgb={targetColor} size="large" />
             </View>
-            <Text style={styles.hexCode}>{rgbToHex(targetColor).toUpperCase()}</Text>
+            <Text style={[styles.hexCode, { color: theme.text }]}>{rgbToHex(targetColor).toUpperCase()}</Text>
           </View>
           
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{levelResult}%</Text>
-              <Text style={styles.statLabel}>Precisión</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{levelResult}%</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Precisión</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stepCount}</Text>
-              <Text style={styles.statLabel}>Pasos</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{stepCount}</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Pasos</Text>
             </View>
           </View>
 
@@ -322,7 +326,7 @@ export const MemoryMixScreen: React.FC = () => {
             {isDaily ? (
               <PrimaryButton
                 title="Volver al menú"
-                onPress={() => navigation.navigate('Home' as never)}
+                onPress={() => navigation.navigate('MainTabs' as never)}
                 style={styles.menuButton}
               />
             ) : (
@@ -346,10 +350,10 @@ export const MemoryMixScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Memory Mix</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Memory Mix</Text>
           {isDaily && (
             <View style={styles.dailyBadge}>
               <Text style={styles.dailyBadgeText}>🎯 RETO DIARIO</Text>
@@ -358,17 +362,17 @@ export const MemoryMixScreen: React.FC = () => {
         </View>
       {!isDaily && (
         <View style={styles.statsContainer}>
-          <Text style={styles.statText}>Nivel: {currentLevel}</Text>
-          <Text style={styles.statText}>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>Nivel: {currentLevel}</Text>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>
             Media: {averageLevel > 0 ? `${averageLevel}%` : 'Desconocido'}
           </Text>
-          <Text style={styles.statText}>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>
             Mejor: {bestMemoryMix > 0 ? `${bestMemoryMix}%` : 'N/A'}
           </Text>
         </View>
       )}
         
-        <Text style={styles.instruction}>
+        <Text style={[styles.instruction, { color: theme.textSecondary }]}>
           {gamePhase === 'memorize' 
             ? 'Memoriza el color que aparece abajo'
             : '¿Recuerdas el color? Recréalo con los sliders'
@@ -378,7 +382,7 @@ export const MemoryMixScreen: React.FC = () => {
 
       {gamePhase === 'memorize' && (
         <View style={styles.memorizeContainer}>
-          <Text style={styles.timerText}>{timeLeft}</Text>
+          <Text style={[styles.timerText, { color: theme.text }]}>{timeLeft}</Text>
           <ColorBlock
             rgb={targetColor}
             size="extra-large"
@@ -390,7 +394,7 @@ export const MemoryMixScreen: React.FC = () => {
       {gamePhase === 'recall' && (
         <>
           <View style={styles.recallContainer}>
-            <Text style={styles.recallLabel}>¿Recuerdas?</Text>
+            <Text style={[styles.recallLabel, { color: theme.text }]}>¿Recuerdas?</Text>
             <ColorBlock
               rgb={{ r: 0, g: 0, b: 0 }}
               size="medium"
@@ -399,7 +403,7 @@ export const MemoryMixScreen: React.FC = () => {
           </View>
 
           <View style={styles.currentColorContainer}>
-            <Text style={styles.currentLabel}>Tu color</Text>
+            <Text style={[styles.currentLabel, { color: theme.text }]}>Tu color</Text>
             <ColorBlock
               rgb={currentColor}
               size="large"
@@ -442,7 +446,6 @@ export const MemoryMixScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0b0b',
     padding: 20,
   },
   header: {
@@ -459,7 +462,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   dailyBadge: {
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
@@ -479,7 +481,6 @@ const styles = StyleSheet.create({
   },
   instruction: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
   },
   statsContainer: {
@@ -491,7 +492,6 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '600',
   },
   memorizeContainer: {
@@ -501,7 +501,6 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 20,
   },
   recallContainer: {
@@ -511,7 +510,6 @@ const styles = StyleSheet.create({
   recallLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 12,
   },
   currentColorContainer: {
@@ -521,7 +519,6 @@ const styles = StyleSheet.create({
   currentLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 12,
   },
   precisionContainer: {
@@ -552,7 +549,6 @@ const styles = StyleSheet.create({
   },
   completedText: {
     fontSize: 18,
-    color: '#FFFFFF',
     marginBottom: 30,
   },
   button: {
@@ -572,7 +568,6 @@ const styles = StyleSheet.create({
   finalTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 40,
     textAlign: 'center',
   },
@@ -583,7 +578,6 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   statCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
@@ -593,12 +587,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 8,
   },
   statLabel: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -624,7 +616,6 @@ const styles = StyleSheet.create({
   resultsTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 30,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
@@ -634,7 +625,6 @@ const styles = StyleSheet.create({
   targetColorSection: {
     alignItems: 'center',
     marginBottom: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 25,
     borderRadius: 20,
     borderWidth: 2,
@@ -642,7 +632,6 @@ const styles = StyleSheet.create({
   },
   targetColorLabel: {
     fontSize: 20,
-    color: '#FFFFFF',
     fontWeight: '700',
     marginBottom: 15,
     textTransform: 'uppercase',
@@ -657,7 +646,6 @@ const styles = StyleSheet.create({
   },
   hexCode: {
     fontSize: 18,
-    color: '#FFFFFF',
     fontWeight: '600',
     marginTop: 15,
     fontFamily: 'monospace',
@@ -687,7 +675,6 @@ const styles = StyleSheet.create({
   finalStatsTitle: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 20,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
@@ -696,7 +683,6 @@ const styles = StyleSheet.create({
   },
   finalStatsSection: {
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 25,
     padding: 30,
     marginBottom: 40,
@@ -711,7 +697,6 @@ const styles = StyleSheet.create({
   finalStatsSubtitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 30,
     textTransform: 'uppercase',
@@ -725,7 +710,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   finalStatCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
     borderRadius: 20,
     alignItems: 'center',
@@ -739,7 +723,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   finalStatCardFull: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
     borderRadius: 20,
     alignItems: 'center',
@@ -755,7 +738,6 @@ const styles = StyleSheet.create({
   finalStatValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
     marginBottom: 10,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
@@ -763,7 +745,6 @@ const styles = StyleSheet.create({
   },
   finalStatLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.8,

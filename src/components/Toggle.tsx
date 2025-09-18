@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 
 interface ToggleProps {
   value: boolean;
@@ -14,12 +16,15 @@ export const Toggle: React.FC<ToggleProps> = ({
   label,
   description,
 }) => {
+  const { isDarkMode } = useGameStore();
+  const theme = getTheme(isDarkMode);
+  
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
         {description && (
-          <Text style={styles.description}>{description}</Text>
+          <Text style={[styles.description, { color: theme.textSecondary }]}>{description}</Text>
         )}
       </View>
       <TouchableOpacity
@@ -46,12 +51,10 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 2,
   },
   description: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
   },
   toggle: {
     width: 50,

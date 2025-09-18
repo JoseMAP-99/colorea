@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { PrimaryButton } from '@/components';
 import { dailySeed, createSeededRNG } from '@/utils/color';
 import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 
 type RootStackParamList = {
   Home: undefined;
@@ -21,6 +22,7 @@ const GAME_MODES = ['Color Chain', 'Gradient Gap', 'Memory Mix'] as const;
 export const ModeDailyScreen: React.FC = () => {
   const navigation = useNavigation<ModeDailyScreenNavigationProp>();
   const { 
+    isDarkMode,
     dailyChallengeCompleted, 
     dailyChallengeScore, 
     dailyChallengeDate,
@@ -28,6 +30,8 @@ export const ModeDailyScreen: React.FC = () => {
     setDailyChallengeScore,
     setDailyChallengeDate
   } = useGameStore();
+  
+  const theme = getTheme(isDarkMode);
   
   // Generar el modo del día basado en la semilla diaria
   const today = new Date();
@@ -77,13 +81,13 @@ export const ModeDailyScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
           <Text style={styles.dailyIcon}>🎯</Text>
           <Text style={styles.title}>Reto Diario</Text>
         </View>
-        <Text style={styles.date}>
+        <Text style={[styles.date, { color: theme.textSecondary }]}>
           {today.toLocaleDateString('es-ES', {
             weekday: 'long',
             year: 'numeric',
@@ -96,19 +100,19 @@ export const ModeDailyScreen: React.FC = () => {
         </Text>
       </View>
 
-      <View style={styles.modeContainer}>
-        <Text style={styles.modeTitle}>Modo de hoy:</Text>
-        <Text style={styles.modeName}>{todaysMode}</Text>
-        <Text style={styles.modeDescription}>
+      <View style={[styles.modeContainer, { backgroundColor: isDarkMode ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 215, 0, 0.15)', borderColor: isDarkMode ? 'rgba(255, 215, 0, 0.3)' : 'rgba(255, 215, 0, 0.5)' }]}>
+        <Text style={[styles.modeTitle, { color: theme.textSecondary }]}>Modo de hoy:</Text>
+        <Text style={[styles.modeName, { color: theme.text }]}>{todaysMode}</Text>
+        <Text style={[styles.modeDescription, { color: isDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)' }]}>
           {getModeDescription(todaysMode)}
         </Text>
       </View>
 
       {isTodayCompleted ? (
-        <View style={styles.completedContainer}>
+        <View style={[styles.completedContainer, { backgroundColor: isDarkMode ? 'rgba(76, 175, 80, 0.1)' : 'rgba(76, 175, 80, 0.15)', borderColor: isDarkMode ? 'rgba(76, 175, 80, 0.3)' : 'rgba(76, 175, 80, 0.5)' }]}>
           <Text style={styles.completedTitle}>¡Reto Completado!</Text>
-          <Text style={styles.completedScore}>Puntuación: {dailyChallengeScore}%</Text>
-          <Text style={styles.completedText}>
+          <Text style={[styles.completedScore, { color: theme.text }]}>Puntuación: {dailyChallengeScore}%</Text>
+          <Text style={[styles.completedText, { color: isDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)' }]}>
             Has completado el reto de hoy. ¡Vuelve mañana para un nuevo desafío!
           </Text>
         </View>
@@ -128,7 +132,6 @@ export const ModeDailyScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0b0b',
   },
   content: {
     flexGrow: 1,
@@ -159,7 +162,6 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
     textTransform: 'capitalize',
     marginBottom: 4,
   },
@@ -169,28 +171,23 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   modeContainer: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
     marginBottom: 40,
     borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.3)',
   },
   modeTitle: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
     marginBottom: 8,
   },
   modeName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 12,
   },
   modeDescription: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -202,12 +199,10 @@ const styles = StyleSheet.create({
     minWidth: 200,
   },
   completedContainer: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(76, 175, 80, 0.3)',
   },
   completedTitle: {
     fontSize: 24,
@@ -218,12 +213,10 @@ const styles = StyleSheet.create({
   completedScore: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 8,
   },
   completedText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     lineHeight: 20,
   },
