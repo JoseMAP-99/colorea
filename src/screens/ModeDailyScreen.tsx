@@ -195,7 +195,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   playButton: {
-    backgroundColor: '#FFD700',
     minWidth: 200,
   },
   completedContainer: {

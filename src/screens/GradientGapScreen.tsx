@@ -125,17 +125,17 @@ export const GradientGapScreen: React.FC = () => {
     const currentLevelPrecision = Math.round(finalPrecision);
     setLevelResult(currentLevelPrecision);
     
-    // Solo actualizar la mejor precisión si las ayudas están desactivadas
-    const areAidsDisabled = !showPrecisionBar && !showHexValue && !showRGBLabels;
-    if (areAidsDisabled) {
-      setBestGradientGap(currentLevelPrecision);
-    }
-    
-    // Si es reto diario, guardar la puntuación
+    // Si es reto diario, guardar la puntuación (no afecta la media global)
     if (isDaily) {
       setDailyChallengeCompleted(true);
       setDailyChallengeScore(currentLevelPrecision);
       setDailyChallengeDate(new Date().toDateString());
+    } else {
+      // Solo actualizar la mejor precisión si las ayudas están desactivadas (modo normal)
+      const areAidsDisabled = !showPrecisionBar && !showHexValue && !showRGBLabels;
+      if (areAidsDisabled) {
+        setBestGradientGap(currentLevelPrecision);
+      }
     }
     
     setShowLevelResults(true);
@@ -223,7 +223,7 @@ export const GradientGapScreen: React.FC = () => {
             key={i}
             rgb={hexToRgb(colorA)}
             size="small"
-            showHex
+            showHex={showHexValue}
           />
         );
       } else if (i === STEPS - 1) {
@@ -232,7 +232,7 @@ export const GradientGapScreen: React.FC = () => {
             key={i}
             rgb={hexToRgb(colorB)}
             size="small"
-            showHex
+            showHex={showHexValue}
           />
         );
       } else if (i === missingIndex) {
@@ -252,7 +252,7 @@ export const GradientGapScreen: React.FC = () => {
             key={i}
             rgb={hexToRgb(interpolatedHex)}
             size="small"
-            showHex
+            showHex={showHexValue}
           />
         );
       }
@@ -267,23 +267,23 @@ export const GradientGapScreen: React.FC = () => {
         <View style={styles.finalStatsContainer}>
           <Text style={[styles.finalStatsTitle, { color: theme.text }]}>¡Partida Finalizada!</Text>
           
-          <View style={styles.finalStatsSection}>
+          <View style={[styles.finalStatsSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text style={[styles.finalStatsSubtitle, { color: theme.textSecondary }]}>Estadísticas Finales</Text>
             
             <View style={styles.finalStatsGrid}>
-              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
-                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.finalAverage}%</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <Text style={[styles.finalStatValue, { color: theme.success }]}>{finalStats.finalAverage}%</Text>
                 <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Media Final</Text>
               </View>
               
-              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
-                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.totalSteps}</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <Text style={[styles.finalStatValue, { color: theme.warning }]}>{finalStats.totalSteps}</Text>
                 <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Pasos Totales</Text>
               </View>
             </View>
             
-            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.levelReached}</Text>
+            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.finalStatValue, { color: theme.primary }]}>{finalStats.levelReached}</Text>
               <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Nivel Alcanzado</Text>
             </View>
           </View>
@@ -316,16 +316,16 @@ export const GradientGapScreen: React.FC = () => {
             <View style={styles.targetColorWrapper}>
               <ColorBlock rgb={hexToRgb(targetHex)} size="large" />
             </View>
-            <Text style={[styles.hexCode, { color: theme.text }]}>{targetHex.toUpperCase()}</Text>
+            <Text style={[styles.hexCode, { color: theme.text, backgroundColor: theme.surfaceSecondary }]}>{targetHex.toUpperCase()}</Text>
           </View>
           
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.text }]}>{levelResult}%</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.statValue, { color: theme.success }]}>{levelResult}%</Text>
               <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Precisión</Text>
             </View>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.text }]}>{stepCount}</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.statValue, { color: theme.warning }]}>{stepCount}</Text>
               <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Pasos</Text>
             </View>
           </View>
@@ -375,9 +375,9 @@ export const GradientGapScreen: React.FC = () => {
 
       {!isDaily && (
         <View style={styles.statsContainer}>
-          <Text style={[styles.statsText, { color: theme.text }]}>Nivel: {currentLevel}</Text>
-          <Text style={[styles.statsText, { color: theme.text }]}>Media: {averageLevel === 0 ? 'Desconocido' : `${averageLevel}%`}</Text>
-          <Text style={[styles.statsText, { color: theme.text }]}>Mejor: {bestGradientGap > 0 ? `${bestGradientGap}%` : 'N/A'}</Text>
+          <Text style={[styles.statsText, { color: theme.textSecondary }]}>Nivel: {currentLevel}</Text>
+          <Text style={[styles.statsText, { color: theme.textSecondary }]}>Media: {averageLevel === 0 ? 'Desconocido' : `${averageLevel}%`}</Text>
+          <Text style={[styles.statsText, { color: theme.textSecondary }]}>Mejor: {bestGradientGap > 0 ? `${bestGradientGap}%` : 'N/A'}</Text>
         </View>
       )}
 
@@ -391,7 +391,7 @@ export const GradientGapScreen: React.FC = () => {
         <Text style={[styles.currentLabel, { color: theme.text }]}>Tu color</Text>
         <ColorBlock
           rgb={currentColor}
-          size="medium"
+          size="extra-large"
           showHex={showHexValue}
         />
       </View>
@@ -424,7 +424,6 @@ export const GradientGapScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0b0b',
     padding: 20,
   },
   header: {
@@ -441,7 +440,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+  },
+  instruction: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 22,
   },
   dailyBadge: {
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
@@ -458,11 +462,6 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-  },
-  instruction: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -504,20 +503,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   checkButton: {
-    backgroundColor: '#4CAF50',
+    // Theme colors applied dynamically
   },
   disabledButton: {
     backgroundColor: 'rgba(76, 175, 80, 0.3)',
   },
   finishButton: {
-    backgroundColor: '#FF9800',
+    // Theme colors applied dynamically
   },
   restartButton: {
-    backgroundColor: '#4CAF50',
     minWidth: 200,
   },
   menuButton: {
-    backgroundColor: '#FF9800',
     minWidth: 200,
   },
   finalStatsContainer: {
@@ -529,31 +526,19 @@ const styles = StyleSheet.create({
   finalStatsTitle: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 20,
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 6,
   },
   finalStatsSection: {
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 25,
+    borderRadius: 16,
     padding: 30,
     marginBottom: 40,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderWidth: 1,
   },
   finalStatsSubtitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 30,
     textTransform: 'uppercase',
@@ -567,45 +552,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   finalStatCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 6,
   },
   finalStatCardFull: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     width: '100%',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 6,
   },
   finalStatValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
     marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
   finalStatLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -626,7 +592,6 @@ const styles = StyleSheet.create({
   resultsTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 30,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
@@ -636,34 +601,25 @@ const styles = StyleSheet.create({
   targetColorSection: {
     alignItems: 'center',
     marginBottom: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 25,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    borderWidth: 1,
   },
   targetColorLabel: {
     fontSize: 20,
-    color: '#FFFFFF',
     fontWeight: '700',
     marginBottom: 15,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   targetColorWrapper: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    // Clean design without shadows
   },
   hexCode: {
     fontSize: 18,
-    color: '#FFFFFF',
     fontWeight: '600',
     marginTop: 15,
     fontFamily: 'monospace',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -677,23 +633,15 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   statCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
   },
   statValue: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#4CAF50',
     marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
@@ -701,7 +649,6 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -711,6 +658,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   nextButton: {
-    backgroundColor: '#4CAF50',
+    // Theme colors applied dynamically
   },
 });

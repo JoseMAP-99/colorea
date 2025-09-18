@@ -113,17 +113,17 @@ export const ColorChainScreen: React.FC = () => {
     const currentLevel = Math.round(currentPrecision);
     setLevelResult(currentLevel);
     
-    // Solo actualizar la mejor precisión si las ayudas están desactivadas
-    const areAidsDisabled = !showPrecisionBar && !showHexValue && !showRGBLabels;
-    if (areAidsDisabled) {
-      setBestColorChain(currentLevel);
-    }
-    
-    // Si es reto diario, guardar la puntuación
+    // Si es reto diario, guardar la puntuación (no afecta la media global)
     if (isDaily) {
       setDailyChallengeCompleted(true);
       setDailyChallengeScore(currentLevel);
       setDailyChallengeDate(new Date().toDateString());
+    } else {
+      // Solo actualizar la mejor precisión si las ayudas están desactivadas (modo normal)
+      const areAidsDisabled = !showPrecisionBar && !showHexValue && !showRGBLabels;
+      if (areAidsDisabled) {
+        setBestColorChain(currentLevel);
+      }
     }
     
     setShowLevelResults(true);
@@ -211,23 +211,23 @@ export const ColorChainScreen: React.FC = () => {
         <View style={styles.finalStatsContainer}>
           <Text style={[styles.finalStatsTitle, { color: theme.text }]}>¡Partida Finalizada!</Text>
           
-          <View style={styles.finalStatsSection}>
+          <View style={[styles.finalStatsSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text style={[styles.finalStatsSubtitle, { color: theme.textSecondary }]}>Estadísticas Finales</Text>
             
             <View style={styles.finalStatsGrid}>
-              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
-                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.finalAverage}%</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <Text style={[styles.finalStatValue, { color: theme.success }]}>{finalStats.finalAverage}%</Text>
                 <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Media Final</Text>
               </View>
               
-              <View style={[styles.finalStatCard, { backgroundColor: theme.surface }]}>
-                <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.totalSteps}</Text>
+              <View style={[styles.finalStatCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <Text style={[styles.finalStatValue, { color: theme.warning }]}>{finalStats.totalSteps}</Text>
                 <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Pasos Totales</Text>
               </View>
             </View>
             
-            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.finalStatValue, { color: theme.text }]}>{finalStats.levelReached}</Text>
+            <View style={[styles.finalStatCardFull, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.finalStatValue, { color: theme.primary }]}>{finalStats.levelReached}</Text>
               <Text style={[styles.finalStatLabel, { color: theme.textSecondary }]}>Nivel Alcanzado</Text>
             </View>
           </View>
@@ -260,16 +260,16 @@ export const ColorChainScreen: React.FC = () => {
             <View style={styles.targetColorWrapper}>
               <ColorBlock rgb={targetColor} size="large" />
             </View>
-            <Text style={[styles.hexCode, { color: theme.text }]}>{rgbToHex(targetColor).toUpperCase()}</Text>
+            <Text style={[styles.hexCode, { color: theme.text, backgroundColor: theme.surfaceSecondary }]}>{rgbToHex(targetColor).toUpperCase()}</Text>
           </View>
           
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.text }]}>{levelResult}%</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.statValue, { color: theme.success }]}>{levelResult}%</Text>
               <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Precisión</Text>
             </View>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.text }]}>{stepCount}</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.statValue, { color: theme.warning }]}>{stepCount}</Text>
               <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Pasos</Text>
             </View>
           </View>
@@ -312,22 +312,20 @@ export const ColorChainScreen: React.FC = () => {
             </View>
           )}
         </View>
+        <Text style={[styles.instruction, { color: theme.textSecondary }]}>
+          Recrea el color objetivo con los sliders RGB
+        </Text>
+      </View>
+
       {!isDaily && (
         <View style={styles.statsContainer}>
-          <Text style={[styles.statText, { color: theme.textSecondary }]}>Pasos: {stepCount}</Text>
+          <Text style={[styles.statText, { color: theme.textSecondary }]}>Nivel: {currentStep}</Text>
           <Text style={[styles.statText, { color: theme.textSecondary }]}>
             Media: {averageLevel > 0 ? `${averageLevel}%` : 'Desconocido'}
           </Text>
           <Text style={[styles.statText, { color: theme.textSecondary }]}>
             Mejor: {bestColorChain > 0 ? `${bestColorChain}%` : 'N/A'}
           </Text>
-        </View>
-      )}
-      </View>
-
-      {!isDaily && (
-        <View style={styles.levelContainer}>
-          <Text style={[styles.levelText, { color: theme.text }]}>Nivel {currentStep}</Text>
         </View>
       )}
 
@@ -344,8 +342,8 @@ export const ColorChainScreen: React.FC = () => {
         <Text style={[styles.currentLabel, { color: theme.text }]}>Tu color</Text>
         <ColorBlock
           rgb={currentColor}
-          size="large"
-          showHex
+          size="extra-large"
+          showHex={showHexValue}
         />
       </View>
 
@@ -394,6 +392,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
+  instruction: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 22,
+  },
   dailyBadge: {
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
     borderRadius: 12,
@@ -420,14 +424,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  levelContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  levelText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
   colorsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -452,13 +448,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   checkButton: {
-    backgroundColor: '#4CAF50',
+    // Theme colors applied dynamically
   },
   disabledButton: {
-    backgroundColor: 'rgba(76, 175, 80, 0.3)',
+    // Theme colors applied dynamically
   },
   finishButton: {
-    backgroundColor: '#FF9800',
+    // Theme colors applied dynamically
   },
   resultsContainer: {
     flex: 1,
@@ -467,7 +463,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   resultCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 40,
     borderRadius: 20,
     alignItems: 'center',
@@ -477,16 +472,13 @@ const styles = StyleSheet.create({
   resultValue: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#4CAF50',
     marginBottom: 8,
   },
   resultLabel: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
   },
   stepsCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
@@ -496,12 +488,10 @@ const styles = StyleSheet.create({
   stepsValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FF9800',
     marginBottom: 8,
   },
   stepsLabel: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '600',
   },
   resultsButtonsContainer: {
@@ -509,7 +499,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   nextButton: {
-    backgroundColor: '#4CAF50',
+    // Theme colors applied dynamically
   },
   statsGrid: {
     flexDirection: 'row',
@@ -518,23 +508,15 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   statCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
   },
   statValue: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#4CAF50',
     marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
@@ -542,7 +524,6 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -553,11 +534,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   restartButton: {
-    backgroundColor: '#4CAF50',
     minWidth: 200,
   },
   menuButton: {
-    backgroundColor: '#FF9800',
     minWidth: 200,
   },
   finalStatsContainer: {
@@ -569,7 +548,6 @@ const styles = StyleSheet.create({
   finalStatsTitle: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 20,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
@@ -578,22 +556,14 @@ const styles = StyleSheet.create({
   },
   finalStatsSection: {
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 25,
+    borderRadius: 16,
     padding: 30,
     marginBottom: 40,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderWidth: 1,
   },
   finalStatsSubtitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 30,
     textTransform: 'uppercase',
@@ -607,45 +577,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   finalStatCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 6,
   },
   finalStatCardFull: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     width: '100%',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 6,
   },
   finalStatValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
     marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
   finalStatLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -655,7 +606,6 @@ const styles = StyleSheet.create({
   resultsTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 30,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
@@ -666,8 +616,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
     padding: 25,
-    borderRadius: 20,
-    borderWidth: 2,
+    borderRadius: 16,
+    borderWidth: 1,
   },
   targetColorLabel: {
     fontSize: 20,
@@ -677,18 +627,13 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   targetColorWrapper: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    // Clean design without shadows
   },
   hexCode: {
     fontSize: 18,
     fontWeight: '600',
     marginTop: 15,
     fontFamily: 'monospace',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,

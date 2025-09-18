@@ -1,5 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 
 interface PrimaryButtonProps {
   title: string;
@@ -16,18 +18,34 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const { isDarkMode } = useGameStore();
+  const theme = getTheme(isDarkMode);
+  
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        disabled && styles.disabled,
+        { 
+          backgroundColor: theme.surface,
+          borderColor: theme.border,
+          borderWidth: 1,
+        },
+        disabled && { 
+          backgroundColor: theme.surfaceSecondary,
+          opacity: 0.6 
+        },
         style,
       ]}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.8}
     >
-      <Text style={[styles.text, disabled && styles.disabledText, textStyle]}>
+      <Text style={[
+        styles.text, 
+        { color: theme.text },
+        disabled && { color: theme.textSecondary },
+        textStyle
+      ]}>
         {title}
       </Text>
     </TouchableOpacity>
@@ -36,7 +54,6 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 12,
@@ -45,14 +62,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   text: {
-    color: '#000000',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  disabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  disabledText: {
-    color: 'rgba(0, 0, 0, 0.5)',
   },
 });

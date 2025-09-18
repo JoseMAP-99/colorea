@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { RGB, rgbToHex } from '@/utils/color';
+import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 
 interface ColorBlockProps {
   rgb: RGB;
@@ -19,13 +21,15 @@ export const ColorBlock: React.FC<ColorBlockProps> = ({
   showHex = false,
   borderStyle = 'solid',
 }) => {
+  const { isDarkMode } = useGameStore();
+  const theme = getTheme(isDarkMode);
   const hex = rgbToHex(rgb);
   const sizeStyles = getSizeStyles(size);
 
   return (
     <View style={styles.container}>
       {showLabel && label && (
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
       )}
       <View
         style={[
@@ -34,17 +38,17 @@ export const ColorBlock: React.FC<ColorBlockProps> = ({
           {
             backgroundColor: hex,
             borderStyle: borderStyle === 'empty' ? 'dashed' : 'solid',
-            borderColor: borderStyle === 'empty' ? '#FFFFFF' : 'transparent',
+            borderColor: borderStyle === 'empty' ? theme.border : 'transparent',
             opacity: borderStyle === 'empty' ? 0.3 : 1,
           },
         ]}
       >
         {borderStyle === 'empty' && (
-          <Text style={styles.emptyText}>?</Text>
+          <Text style={[styles.emptyText, { color: theme.text }]}>?</Text>
         )}
       </View>
       {showHex && (
-        <Text style={styles.hexText}>{hex.toUpperCase()}</Text>
+        <Text style={[styles.hexText, { color: theme.text }]}>{hex.toUpperCase()}</Text>
       )}
     </View>
   );
@@ -69,7 +73,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
@@ -81,12 +84,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: '#FFFFFF',
     fontSize: 24,
     fontWeight: 'bold',
   },
   hexText: {
-    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '500',
     opacity: 0.8,

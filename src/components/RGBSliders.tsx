@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { RGB } from '@/utils/color';
 import { useGameStore } from '@/store/game';
+import { getTheme } from '@/utils/theme';
 
 interface RGBSlidersProps {
   rgb: RGB;
@@ -19,7 +20,8 @@ export const RGBSliders: React.FC<RGBSlidersProps> = ({
   onSliderPress,
   onSliderRelease,
 }) => {
-  const { showRGBLabels } = useGameStore();
+  const { showRGBLabels, isDarkMode } = useGameStore();
+  const theme = getTheme(isDarkMode);
   
   const updateChannel = (channel: keyof RGB, value: number) => {
     const newRGB = { ...rgb, [channel]: Math.round(value) };
@@ -29,7 +31,7 @@ export const RGBSliders: React.FC<RGBSlidersProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.sliderContainer}>
-        {showRGBLabels && <Text style={styles.label}>R</Text>}
+        {showRGBLabels && <Text style={[styles.label, { color: theme.text }]}>R</Text>}
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -39,15 +41,15 @@ export const RGBSliders: React.FC<RGBSlidersProps> = ({
           onSlidingStart={onSliderPress}
           onSlidingComplete={onSliderRelease}
           minimumTrackTintColor="#FF0000"
-          maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
+          maximumTrackTintColor={theme.border}
           step={1}
           disabled={disabled}
         />
-        {showRGBLabels && <Text style={styles.value}>{rgb.r}</Text>}
+        {showRGBLabels && <Text style={[styles.value, { color: theme.text }]}>{rgb.r}</Text>}
       </View>
 
       <View style={styles.sliderContainer}>
-        {showRGBLabels && <Text style={styles.label}>G</Text>}
+        {showRGBLabels && <Text style={[styles.label, { color: theme.text }]}>G</Text>}
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -57,15 +59,15 @@ export const RGBSliders: React.FC<RGBSlidersProps> = ({
           onSlidingStart={onSliderPress}
           onSlidingComplete={onSliderRelease}
           minimumTrackTintColor="#00FF00"
-          maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
+          maximumTrackTintColor={theme.border}
           step={1}
           disabled={disabled}
         />
-        {showRGBLabels && <Text style={styles.value}>{rgb.g}</Text>}
+        {showRGBLabels && <Text style={[styles.value, { color: theme.text }]}>{rgb.g}</Text>}
       </View>
 
       <View style={styles.sliderContainer}>
-        {showRGBLabels && <Text style={styles.label}>B</Text>}
+        {showRGBLabels && <Text style={[styles.label, { color: theme.text }]}>B</Text>}
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -75,11 +77,11 @@ export const RGBSliders: React.FC<RGBSlidersProps> = ({
           onSlidingStart={onSliderPress}
           onSlidingComplete={onSliderRelease}
           minimumTrackTintColor="#0000FF"
-          maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
+          maximumTrackTintColor={theme.border}
           step={1}
           disabled={disabled}
         />
-        {showRGBLabels && <Text style={styles.value}>{rgb.b}</Text>}
+        {showRGBLabels && <Text style={[styles.value, { color: theme.text }]}>{rgb.b}</Text>}
       </View>
     </View>
   );
@@ -96,7 +98,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   label: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
     width: 20,
@@ -108,7 +109,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   value: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
     width: 40,
