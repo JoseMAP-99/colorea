@@ -1,41 +1,45 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { PrimaryButton, Toggle } from '@/components';
+import { Toggle } from '@/components';
 import { useGameStore } from '@/store/game';
-
-type RootStackParamList = {
-  Home: undefined;
-  Settings: undefined;
-  ModeDaily: undefined;
-  ColorChain: { isDaily?: boolean };
-  GradientGap: undefined;
-  MemoryMix: undefined;
-};
-
-type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
+import { getTheme } from '@/utils/theme';
 
 export const SettingsScreen: React.FC = () => {
-  const navigation = useNavigation<SettingsScreenNavigationProp>();
   const { 
+    isDarkMode,
+    setIsDarkMode,
     showPrecisionBar, 
     setShowPrecisionBar, 
     showHexValue, 
-    setShowHexValue 
+    setShowHexValue,
+    showRGBLabels,
+    setShowRGBLabels
   } = useGameStore();
+  
+  const theme = getTheme(isDarkMode);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.title}>Ajustes</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: theme.text }]}>Ajustes</Text>
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
           Personaliza tu experiencia de juego
         </Text>
       </View>
 
-      <View style={styles.settingsContainer}>
-        <Text style={styles.settingsTitle}>Configuración de Juego</Text>
+      <View style={[styles.settingsContainer, { backgroundColor: theme.surfaceSecondary }]}>
+        <Text style={[styles.settingsTitle, { color: theme.text }]}>Apariencia</Text>
+        
+        <Toggle
+          value={isDarkMode}
+          onValueChange={setIsDarkMode}
+          label="Modo oscuro"
+          description="Cambia entre el tema claro y oscuro de la aplicación"
+        />
+      </View>
+
+      <View style={[styles.settingsContainer, { backgroundColor: theme.surfaceSecondary }]}>
+        <Text style={[styles.settingsTitle, { color: theme.text }]}>Configuración de Juego</Text>
         
         <Toggle
           value={showPrecisionBar}
@@ -50,13 +54,12 @@ export const SettingsScreen: React.FC = () => {
           label="Mostrar valor HEX"
           description="Muestra el código hexadecimal del color objetivo"
         />
-      </View>
-
-      <View style={styles.buttonsContainer}>
-        <PrimaryButton
-          title="Volver al Inicio"
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
+        
+        <Toggle
+          value={showRGBLabels}
+          onValueChange={setShowRGBLabels}
+          label="Mostrar etiquetas RGB"
+          description="Muestra las etiquetas R, G, B y valores numéricos en los sliders"
         />
       </View>
     </ScrollView>
@@ -66,11 +69,11 @@ export const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0b0b',
   },
   content: {
     flexGrow: 1,
     padding: 20,
+    paddingBottom: 100, // Espacio para la barra de navegación
     justifyContent: 'center',
   },
   header: {
@@ -80,30 +83,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
   },
   settingsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 20,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   settingsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 20,
-  },
-  buttonsContainer: {
-    gap: 16,
-  },
-  backButton: {
-    backgroundColor: '#4CAF50',
   },
 });

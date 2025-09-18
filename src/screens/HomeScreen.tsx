@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { PrimaryButton } from '@/components';
@@ -18,40 +18,25 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { bestDaily } = useGameStore();
+  const { getOverallAverage } = useGameStore();
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>Colorea</Text>
-            <Text style={styles.subtitle}>
-              Domina el arte de los colores
-            </Text>
-          </View>
-          <TouchableOpacity 
-            style={styles.settingsIcon}
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Text style={styles.gearIcon}>⚙️</Text>
-          </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>Colorea</Text>
+          <Text style={styles.subtitle}>
+            Domina el arte de los colores
+          </Text>
         </View>
       </View>
 
       <View style={styles.statsContainer}>
-        <Text style={styles.statsLabel}>Mejor precisión diaria</Text>
-        <Text style={styles.statsValue}>{bestDaily}%</Text>
+        <Text style={styles.statsLabel}>Mejor precisión general</Text>
+        <Text style={styles.statsValue}>{getOverallAverage()}%</Text>
       </View>
 
-
       <View style={styles.buttonsContainer}>
-        <PrimaryButton
-          title="Reto Diario"
-          onPress={() => navigation.navigate('ModeDaily')}
-          style={styles.button}
-        />
-
         <PrimaryButton
           title="Color Chain"
           onPress={() => navigation.navigate('ColorChain', { isDaily: false })}
@@ -82,18 +67,14 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     padding: 20,
+    paddingBottom: 100, // Espacio para la barra de navegación
     justifyContent: 'center',
   },
   header: {
     marginBottom: 40,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerContent: {
-    flex: 1,
     alignItems: 'center',
   },
   title: {
@@ -106,15 +87,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
-  },
-  settingsIcon: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginLeft: 10,
-  },
-  gearIcon: {
-    fontSize: 24,
   },
   statsContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

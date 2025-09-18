@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { PrimaryButton, ColorBlock, RGBSliders, PrecisionBar } from '@/components';
 import { useGameStore } from '@/store/game';
 import { 
@@ -8,7 +8,8 @@ import {
   precisionPercent, 
   generateSeededColor, 
   createSeededRNG,
-  dailySeed
+  dailySeed,
+  rgbToHex
 } from '@/utils/color';
 // import HapticFeedback from 'react-native-haptic-feedback';
 
@@ -29,7 +30,17 @@ type MemoryMixScreenRouteProp = RouteProp<RootStackParamList, 'MemoryMix'>;
 
 export const MemoryMixScreen: React.FC = () => {
   const route = useRoute<MemoryMixScreenRouteProp>();
-  const { showPrecisionBar, showHexValue } = useGameStore();
+  const navigation = useNavigation();
+  const { 
+    showPrecisionBar, 
+    showHexValue, 
+    showRGBLabels, 
+    bestMemoryMix, 
+    setBestMemoryMix,
+    setDailyChallengeCompleted,
+    setDailyChallengeScore,
+    setDailyChallengeDate
+  } = useGameStore();
   
   const isDaily = route.params?.isDaily || false;
   
@@ -49,7 +60,9 @@ export const MemoryMixScreen: React.FC = () => {
     totalSteps: 0,
     levelReached: 0
   });
-  const [hasMovedSlider, setHasMovedSlider] = useState(false);
+  const [showLevelResults, setShowLevelResults] = useState(false);
+  const [levelResult, setLevelResult] = useState(0);
+  const [totalStepsAllLevels, setTotalStepsAllLevels] = useState(0);
 
   useEffect(() => {
     initializeGame();
@@ -113,7 +126,8 @@ export const MemoryMixScreen: React.FC = () => {
     setAverageLevel(0);
     setCurrentLevel(1);
     setGameFinished(false);
-    setHasMovedSlider(false);
+    setShowLevelResults(false);
+    setTotalStepsAllLevels(0);
     setFinalStats({
       finalAverage: 0,
       totalSteps: 0,
@@ -141,12 +155,30 @@ export const MemoryMixScreen: React.FC = () => {
       return;
     }
     
-    // Guardar el nivel actual (precisión) en el historial
+    // Guardar el resultado del nivel actual
     const currentLevelPrecision = Math.round(finalPrecision);
-    const newLevelHistory = [...levelHistory, currentLevelPrecision];
-    setLevelHistory(newLevelHistory);
+    setLevelResult(currentLevelPrecision);
     
-    // Calcular la media de todos los niveles
+    // Solo actualizar la mejor precisión si las ayudas están desactivadas
+    const areAidsDisabled = !showPrecisionBar && !showHexValue && !showRGBLabels;
+    if (areAidsDisabled) {
+      setBestMemoryMix(currentLevelPrecision);
+    }
+    
+    // Si es reto diario, guardar la puntuación
+    if (isDaily) {
+      setDailyChallengeCompleted(true);
+      setDailyChallengeScore(currentLevelPrecision);
+      setDailyChallengeDate(new Date().toDateString());
+    }
+    
+    setShowLevelResults(true);
+  };
+
+  const handleNextLevel = () => {
+    const newLevelHistory = [...levelHistory, levelResult];
+    setLevelHistory(newLevelHistory);
+    setTotalStepsAllLevels(prev => prev + stepCount);
     const average = newLevelHistory.reduce((sum, level) => sum + level, 0) / newLevelHistory.length;
     setAverageLevel(Math.round(average));
     
@@ -162,17 +194,28 @@ export const MemoryMixScreen: React.FC = () => {
     setCurrentLevel(prev => prev + 1);
     setGamePhase('memorize');
     setTimeLeft(MEMORY_TIME);
+    setStepCount(0);
+    setShowLevelResults(false);
   };
 
-  const handleSliderPress = () => {
-    // No necesitamos hacer nada cuando presiona
+  const handleFinishGame = () => {
+    const finalLevelHistory = [...levelHistory, levelResult];
+    const finalAverage = finalLevelHistory.reduce((sum, level) => sum + level, 0) / finalLevelHistory.length;
+    const finalTotalSteps = totalStepsAllLevels + stepCount;
+    
+    setFinalStats({
+      finalAverage: Math.round(finalAverage),
+      totalSteps: finalTotalSteps,
+      levelReached: currentLevel
+    });
+    
+    setGameFinished(true);
   };
+
 
   const handleSliderRelease = () => {
     // Incrementar contador de pasos cuando el usuario suelta el slider
     setStepCount(prev => prev + 1);
-    // Marcar que se ha movido el slider
-    setHasMovedSlider(true);
   };
 
   const handleRestart = () => {
@@ -180,22 +223,6 @@ export const MemoryMixScreen: React.FC = () => {
   };
 
 
-  const handleFinishGame = () => {
-    // Guardar el nivel final en el historial
-    const finalLevel = Math.round(currentPrecision);
-    const finalLevelHistory = [...levelHistory, finalLevel];
-    
-    // Calcular la media final
-    const finalAverage = finalLevelHistory.reduce((sum, level) => sum + level, 0) / finalLevelHistory.length;
-    
-    setFinalStats({
-      finalAverage: Math.round(finalAverage),
-      totalSteps: stepCount,
-      levelReached: currentLevel
-    });
-    
-    setGameFinished(true);
-  };
 
   if (gameCompleted) {
     return (
@@ -205,11 +232,18 @@ export const MemoryMixScreen: React.FC = () => {
           <Text style={styles.completedText}>
             Precisión final: {Math.round(currentPrecision)}%
           </Text>
-          <PrimaryButton
-            title="Jugar de nuevo"
-            onPress={handleRestart}
-            style={styles.button}
-          />
+          <View style={styles.completedButtonsContainer}>
+            <PrimaryButton
+              title="Jugar de nuevo"
+              onPress={handleRestart}
+              style={styles.button}
+            />
+            <PrimaryButton
+              title="Volver al menú"
+              onPress={() => navigation.navigate('Home' as never)}
+              style={styles.menuButton}
+            />
+          </View>
         </View>
       </View>
     );
@@ -219,31 +253,92 @@ export const MemoryMixScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <View style={styles.finalStatsContainer}>
-          <Text style={styles.finalTitle}>¡Partida Finalizada!</Text>
+          <Text style={styles.finalStatsTitle}>¡Partida Finalizada!</Text>
           
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{finalStats.finalAverage}%</Text>
-              <Text style={styles.statLabel}>Media Final</Text>
+          <View style={styles.finalStatsSection}>
+            <Text style={styles.finalStatsSubtitle}>Estadísticas Finales</Text>
+            
+            <View style={styles.finalStatsGrid}>
+              <View style={styles.finalStatCard}>
+                <Text style={styles.finalStatValue}>{finalStats.finalAverage}%</Text>
+                <Text style={styles.finalStatLabel}>Media Final</Text>
+              </View>
+              
+              <View style={styles.finalStatCard}>
+                <Text style={styles.finalStatValue}>{finalStats.totalSteps}</Text>
+                <Text style={styles.finalStatLabel}>Pasos Totales</Text>
+              </View>
             </View>
             
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{finalStats.totalSteps}</Text>
-              <Text style={styles.statLabel}>Pasos Totales</Text>
-            </View>
-            
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{finalStats.levelReached}</Text>
-              <Text style={styles.statLabel}>Nivel</Text>
+            <View style={styles.finalStatCardFull}>
+              <Text style={styles.finalStatValue}>{finalStats.levelReached}</Text>
+              <Text style={styles.finalStatLabel}>Nivel Alcanzado</Text>
             </View>
           </View>
-
+          
           <View style={styles.finalButtonsContainer}>
             <PrimaryButton
-              title="Jugar de Nuevo"
+              title="Jugar de nuevo"
               onPress={handleRestart}
               style={styles.restartButton}
             />
+            <PrimaryButton
+              title="Volver al menú"
+              onPress={() => navigation.navigate('Home' as never)}
+              style={styles.menuButton}
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (showLevelResults) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.resultsContainer}>
+          <Text style={styles.resultsTitle}>¡Nivel {currentLevel} Completado!</Text>
+          
+          <View style={styles.targetColorSection}>
+            <Text style={styles.targetColorLabel}>Color objetivo</Text>
+            <View style={styles.targetColorWrapper}>
+              <ColorBlock rgb={targetColor} size="large" />
+            </View>
+            <Text style={styles.hexCode}>{rgbToHex(targetColor).toUpperCase()}</Text>
+          </View>
+          
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{levelResult}%</Text>
+              <Text style={styles.statLabel}>Precisión</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stepCount}</Text>
+              <Text style={styles.statLabel}>Pasos</Text>
+            </View>
+          </View>
+
+          <View style={styles.resultsButtonsContainer}>
+            {isDaily ? (
+              <PrimaryButton
+                title="Volver al menú"
+                onPress={() => navigation.navigate('Home' as never)}
+                style={styles.menuButton}
+              />
+            ) : (
+              <>
+                <PrimaryButton
+                  title="Siguiente Nivel"
+                  onPress={handleNextLevel}
+                  style={styles.nextButton}
+                />
+                <PrimaryButton
+                  title="Finalizar Partida"
+                  onPress={handleFinishGame}
+                  style={styles.finishButton}
+                />
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -253,13 +348,25 @@ export const MemoryMixScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Memory Mix</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Memory Mix</Text>
+          {isDaily && (
+            <View style={styles.dailyBadge}>
+              <Text style={styles.dailyBadgeText}>🎯 RETO DIARIO</Text>
+            </View>
+          )}
+        </View>
+      {!isDaily && (
         <View style={styles.statsContainer}>
           <Text style={styles.statText}>Nivel: {currentLevel}</Text>
           <Text style={styles.statText}>
             Media: {averageLevel > 0 ? `${averageLevel}%` : 'Desconocido'}
           </Text>
+          <Text style={styles.statText}>
+            Mejor: {bestMemoryMix > 0 ? `${bestMemoryMix}%` : 'N/A'}
+          </Text>
         </View>
+      )}
         
         <Text style={styles.instruction}>
           {gamePhase === 'memorize' 
@@ -274,7 +381,7 @@ export const MemoryMixScreen: React.FC = () => {
           <Text style={styles.timerText}>{timeLeft}</Text>
           <ColorBlock
             rgb={targetColor}
-            size="large"
+            size="extra-large"
             showHex={showHexValue}
           />
         </View>
@@ -286,7 +393,7 @@ export const MemoryMixScreen: React.FC = () => {
             <Text style={styles.recallLabel}>¿Recuerdas?</Text>
             <ColorBlock
               rgb={{ r: 0, g: 0, b: 0 }}
-              size="large"
+              size="medium"
               borderStyle="empty"
             />
           </View>
@@ -295,7 +402,7 @@ export const MemoryMixScreen: React.FC = () => {
             <Text style={styles.currentLabel}>Tu color</Text>
             <ColorBlock
               rgb={currentColor}
-              size="medium"
+              size="large"
               showHex
             />
           </View>
@@ -310,7 +417,6 @@ export const MemoryMixScreen: React.FC = () => {
             <RGBSliders
               rgb={currentColor}
               onRGBChange={setCurrentColor}
-              onSliderPress={handleSliderPress}
               onSliderRelease={handleSliderRelease}
             />
           </View>
@@ -323,14 +429,7 @@ export const MemoryMixScreen: React.FC = () => {
             <PrimaryButton
               title="Comprobar"
               onPress={handleCheck}
-              style={!hasMovedSlider ? styles.disabledButton : styles.checkButton}
-              disabled={!hasMovedSlider}
-            />
-            
-            <PrimaryButton
-              title="Finalizar partida"
-              onPress={handleFinishGame}
-              style={styles.finishButton}
+              style={styles.checkButton}
             />
           </>
         )}
@@ -350,11 +449,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 30,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 8,
+  },
+  dailyBadge: {
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+  },
+  dailyBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FFD700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   instruction: {
     fontSize: 14,
@@ -418,9 +539,6 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: 'rgba(76, 175, 80, 0.3)',
   },
-  finishButton: {
-    backgroundColor: '#FF9800',
-  },
   completedContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -439,6 +557,11 @@ const styles = StyleSheet.create({
   },
   button: {
     minWidth: 200,
+  },
+  completedButtonsContainer: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 12,
   },
   finalStatsContainer: {
     flex: 1,
@@ -481,8 +604,170 @@ const styles = StyleSheet.create({
   },
   finalButtonsContainer: {
     width: '100%',
+    alignItems: 'center',
+    gap: 12,
   },
   restartButton: {
     backgroundColor: '#4CAF50',
+    minWidth: 200,
+  },
+  menuButton: {
+    backgroundColor: '#FF9800',
+    minWidth: 200,
+  },
+  resultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  resultsTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 30,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  targetColorSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 25,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  targetColorLabel: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    marginBottom: 15,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  targetColorWrapper: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  hexCode: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    marginTop: 15,
+    fontFamily: 'monospace',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    letterSpacing: 1,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 40,
+    gap: 20,
+  },
+  resultsButtonsContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  nextButton: {
+    backgroundColor: '#4CAF50',
+  },
+  finishButton: {
+    backgroundColor: '#FF9800',
+  },
+  finalStatsTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 20,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 6,
+  },
+  finalStatsSection: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 25,
+    padding: 30,
+    marginBottom: 40,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  finalStatsSubtitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 30,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  finalStatsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 15,
+    marginBottom: 20,
+  },
+  finalStatCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    padding: 25,
+    borderRadius: 20,
+    alignItems: 'center',
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  finalStatCardFull: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    padding: 25,
+    borderRadius: 20,
+    alignItems: 'center',
+    width: '100%',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  finalStatValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    marginBottom: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  finalStatLabel: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });

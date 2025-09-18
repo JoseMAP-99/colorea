@@ -5,7 +5,7 @@ import { RGB, rgbToHex } from '@/utils/color';
 interface ColorBlockProps {
   rgb: RGB;
   label?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'extra-large';
   showLabel?: boolean;
   showHex?: boolean;
   borderStyle?: 'solid' | 'dashed' | 'empty';
@@ -50,12 +50,14 @@ export const ColorBlock: React.FC<ColorBlockProps> = ({
   );
 };
 
-const getSizeStyles = (size: 'small' | 'medium' | 'large') => {
+const getSizeStyles = (size: 'small' | 'medium' | 'large' | 'extra-large') => {
   switch (size) {
     case 'small':
       return { width: 60, height: 60 };
     case 'large':
       return { width: 120, height: 120 };
+    case 'extra-large':
+      return { width: 180, height: 180 };
     default:
       return { width: 80, height: 80 };
   }

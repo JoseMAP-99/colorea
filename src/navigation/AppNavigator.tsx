@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { 
   HomeScreen, 
   ModeDailyScreen, 
@@ -9,23 +10,46 @@ import {
   MemoryMixScreen,
   SettingsScreen
 } from '@/screens';
+import { BottomTabBar } from '@/components';
 
 export type RootStackParamList = {
-  Home: undefined;
-  Settings: undefined;
-  ModeDaily: undefined;
+  MainTabs: undefined;
   ColorChain: { isDaily?: boolean };
   GradientGap: { isDaily?: boolean };
   MemoryMix: { isDaily?: boolean };
 };
 
+export type MainTabParamList = {
+  Daily: undefined;
+  Games: undefined;
+  Settings: undefined;
+};
+
 const Stack = createStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+// Componente de pestañas principales
+const MainTabNavigator: React.FC = () => {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <BottomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { display: 'none' }, // Ocultamos la barra nativa
+      }}
+    >
+      <Tab.Screen name="Daily" component={ModeDailyScreen} />
+      <Tab.Screen name="Games" component={HomeScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
+};
 
 export const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="MainTabs"
         screenOptions={{
           headerShown: false,
           gestureEnabled: true,
@@ -67,9 +91,7 @@ export const AppNavigator: React.FC = () => {
           },
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="ModeDaily" component={ModeDailyScreen} />
+        <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         <Stack.Screen name="ColorChain" component={ColorChainScreen} />
         <Stack.Screen name="GradientGap" component={GradientGapScreen} />
         <Stack.Screen name="MemoryMix" component={MemoryMixScreen} />

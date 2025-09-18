@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { PrimaryButton } from '@/components';
 import { dailySeed, createSeededRNG } from '@/utils/color';
+import { useGameStore } from '@/store/game';
 
 type RootStackParamList = {
   Home: undefined;
@@ -19,13 +20,34 @@ const GAME_MODES = ['Color Chain', 'Gradient Gap', 'Memory Mix'] as const;
 
 export const ModeDailyScreen: React.FC = () => {
   const navigation = useNavigation<ModeDailyScreenNavigationProp>();
+  const { 
+    dailyChallengeCompleted, 
+    dailyChallengeScore, 
+    dailyChallengeDate,
+    setDailyChallengeCompleted,
+    setDailyChallengeScore,
+    setDailyChallengeDate
+  } = useGameStore();
   
   // Generar el modo del día basado en la semilla diaria
   const today = new Date();
+  const todayString = today.toDateString();
   const seed = dailySeed(today);
   const rng = createSeededRNG(seed);
   const modeIndex = Math.floor(rng() * GAME_MODES.length);
   const todaysMode = GAME_MODES[modeIndex];
+  
+  // Verificar si el reto de hoy ya fue completado
+  const isTodayCompleted = dailyChallengeCompleted && dailyChallengeDate === todayString;
+  
+  // Resetear el reto si es un nuevo día
+  useEffect(() => {
+    if (dailyChallengeDate !== todayString) {
+      setDailyChallengeCompleted(false);
+      setDailyChallengeScore(0);
+      setDailyChallengeDate(todayString);
+    }
+  }, [todayString, dailyChallengeDate, setDailyChallengeCompleted, setDailyChallengeScore, setDailyChallengeDate]);
 
   const handlePlay = () => {
     switch (todaysMode) {
@@ -55,9 +77,12 @@ export const ModeDailyScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.title}>Reto Diario</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.dailyIcon}>🎯</Text>
+          <Text style={styles.title}>Reto Diario</Text>
+        </View>
         <Text style={styles.date}>
           {today.toLocaleDateString('es-ES', {
             weekday: 'long',
@@ -65,6 +90,9 @@ export const ModeDailyScreen: React.FC = () => {
             month: 'long',
             day: 'numeric',
           })}
+        </Text>
+        <Text style={styles.subtitle}>
+          Un desafío único cada día
         </Text>
       </View>
 
@@ -76,14 +104,24 @@ export const ModeDailyScreen: React.FC = () => {
         </Text>
       </View>
 
-      <View style={styles.buttonsContainer}>
-        <PrimaryButton
-          title="Jugar"
-          onPress={handlePlay}
-          style={styles.playButton}
-        />
-      </View>
-    </View>
+      {isTodayCompleted ? (
+        <View style={styles.completedContainer}>
+          <Text style={styles.completedTitle}>¡Reto Completado!</Text>
+          <Text style={styles.completedScore}>Puntuación: {dailyChallengeScore}%</Text>
+          <Text style={styles.completedText}>
+            Has completado el reto de hoy. ¡Vuelve mañana para un nuevo desafío!
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.buttonsContainer}>
+          <PrimaryButton
+            title="Jugar"
+            onPress={handlePlay}
+            style={styles.playButton}
+          />
+        </View>
+      )}
+    </ScrollView>
   );
 };
 
@@ -91,30 +129,53 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0b0b0b',
+  },
+  content: {
+    flexGrow: 1,
     padding: 20,
+    paddingBottom: 100, // Espacio para la barra de navegación
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
     marginBottom: 40,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dailyIcon: {
+    fontSize: 32,
+    marginRight: 12,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    color: '#FFD700',
+    textShadowColor: 'rgba(255, 215, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   date: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.7)',
     textTransform: 'capitalize',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 215, 0, 0.8)',
+    fontStyle: 'italic',
   },
   modeContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
     marginBottom: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
   },
   modeTitle: {
     fontSize: 16,
@@ -137,6 +198,33 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   playButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FFD700',
+    minWidth: 200,
+  },
+  completedContainer: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(76, 175, 80, 0.3)',
+  },
+  completedTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    marginBottom: 12,
+  },
+  completedScore: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  completedText: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
